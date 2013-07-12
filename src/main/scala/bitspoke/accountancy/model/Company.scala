@@ -1,6 +1,6 @@
 package bitspoke.accountancy.model
 
-import scala.collection.mutable.Set
+import org.joda.time.DateTime
 
 /**
  * <p>
@@ -10,15 +10,63 @@ import scala.collection.mutable.Set
  *
  * @param name the unique name of the company
  */
-class Company(val name:String) {
-
+class Company private (val name:String) extends Ordered[Company]
+{
   require(name!=null && !name.trim.isEmpty, "Company.name required")
 
-  // one-Company-to-zero-or-many-Sales
-  val sales = Set.empty[Sale]
+  private var _sales:List[Invoice] = Nil
 
-  // TODO reduce visibility of this method
-  def addSale(sale:Sale):Unit = sales += sale
+  def sales = _sales
+
+  /**
+   * Prepend a new sale
+   *
+   * @param date
+   * @param buyer
+   * @return a new draft invoice
+   */
+  def sell(date:DateTime, buyer:Company):Invoice = {
+    val invoice = new Invoice(this, nextInvoiceNumber, date, buyer)
+    _sales = invoice :: _sales
+    invoice
+  }
+
+  // TODO private var _expenses:List[Receipt] = Nil
+
+  // TODO def expenses = _expenses
+
+  // TODO def buy(date:DateTime, seller:Company):Invoice =
+
+
+  /**
+   * Evaluate the next invoice number
+   *
+   * @return an invoice number
+   */
+  private def nextInvoiceNumber:String = (_sales.length + 1).toString
+
+
+  /**
+   * Find a sale by its invoice number
+   *
+   * @param number the invoice number to lookup
+   * @return some invoice or none
+   */
+  def findInvoice(number:String):Option[Invoice] = sales.find(_.number == number)
+
+
+  /**
+   * The net income this company receives from its normal business activities,
+   * usually from the sale of goods and services to customers.
+   *
+   * @return revenue
+   */
+  def revenue() = sales.map(_.net).reduce(_ + _)
+
+
+
+  override def compare(that: Company): Int = this.name.compare(that.name)
+
 
   def canEqual(that:Any): Boolean = that.isInstanceOf[Company]
 
@@ -29,8 +77,11 @@ class Company(val name:String) {
 
   override def hashCode:Int = 41 * (41 + name.hashCode)
 
+
   override def toString:String = name
 }
+
+
 
 
 object Company {
