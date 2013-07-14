@@ -6,28 +6,29 @@ import org.joda.time.DateTime
  * TODO ...
  *
  * @param seller
- * @param number
  * @param date
  * @param buyer
  */
 class Invoice private[model] (
       val seller:Company,
-      val number:String,
       val date:DateTime,
       val buyer:Company
 )
 {
   require(seller != null, "Invoice.seller required")
-  require(number != null && !number.trim.isEmpty, "Invoice.number required")
   require(date != null, "Invoice.date required")
   require(date.isBeforeNow, "Invoice.date before now required")
   require(buyer != null, "Invoice.buyer required")
 
   private var _draft = true
 
-  def draft = _draft
+  private var _number = -1
 
   private var _items:List[LineItem] = Nil
+
+  def draft = _draft
+
+  def number = _number
 
   def items = _items
 
@@ -52,11 +53,9 @@ class Invoice private[model] (
   }
 
 
-  def issue() {
-    if (!_items.isEmpty)
-      _draft = false
-    else
-      sys.error("Cannot issue this empty invoice")
+  private[model] def issue(number:Int) {
+    _draft = false
+    _number = number
   }
 
   def net = _items.map(_.net).reduce(_ + _)
@@ -67,11 +66,11 @@ class Invoice private[model] (
 
 
   override def equals(other:Any):Boolean = other match {
-    case that:Invoice => (this.seller == that.seller) && (this.number == that.number)
+    case that:Invoice => (this.seller == that.seller) && (this._number == that._number)
     case _ => false
   }
 
-  override def hashCode() : Int = 41 * ((41 * (41 + seller.hashCode)) + number.hashCode)
+  override def hashCode() : Int = 41 * ((41 * (41 + seller.hashCode)) + _number.hashCode)
 }
 
 

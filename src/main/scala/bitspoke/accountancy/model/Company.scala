@@ -25,8 +25,8 @@ class Company private (val name:String) extends Ordered[Company]
    * @param buyer
    * @return a new draft invoice
    */
-  def sell(date:DateTime, buyer:Company):Invoice = {
-    val invoice = new Invoice(this, nextInvoiceNumber, date, buyer)
+  def createInvoice(date:DateTime, buyer:Company):Invoice = {
+    val invoice = new Invoice(this, date, buyer)
     _sales = invoice :: _sales
     invoice
   }
@@ -37,13 +37,23 @@ class Company private (val name:String) extends Ordered[Company]
 
   // TODO def buy(date:DateTime, seller:Company):Invoice =
 
+  /**
+   * Issue the supplied draf invoice
+   *
+   * @param invoice
+   */
+  def issueInvoice(invoice:Invoice) {
+    require(invoice.draft, "Draft invoice required")
+    require(!invoice.items.isEmpty, "Not empty invoice required")
+    invoice.issue(_sales.length + 1 - draftInvoices.length)
+  }
 
   /**
-   * Evaluate the next invoice number
+   * List the draft invoices
    *
-   * @return an invoice number
+   * @return
    */
-  private def nextInvoiceNumber:String = (_sales.length + 1).toString
+  def draftInvoices:List[Invoice] = _sales.filter(_.draft)
 
 
   /**
@@ -52,7 +62,7 @@ class Company private (val name:String) extends Ordered[Company]
    * @param number the invoice number to lookup
    * @return some invoice or none
    */
-  def findInvoice(number:String):Option[Invoice] = sales.find(_.number == number)
+  def findInvoice(number:Int):Option[Invoice] = _sales.find(_.number == number)
 
 
   /**

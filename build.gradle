@@ -15,3 +15,16 @@ dependencies {
 }
 
 // TODO add an Ant based task for ScalaTest
+
+test << {
+    ant.taskdef (
+        name: 'scalatest',
+        classname: 'org.scalatest.tools.ScalaTestAntTask',
+        classpath: classpath.asPath
+    )
+    ant.scalatest (
+        runpath: testClassesDir,
+        haltonfailure: 'true',
+        fork: 'false'
+    ) { reporter (type: 'stdout')}
+}
