@@ -17,16 +17,18 @@ class Invoice private[model] (
 {
   require(seller != null, "Invoice.seller required")
   require(date != null, "Invoice.date required")
-  require(date.isBeforeNow, "Invoice.date before now required")
+  // TODO require(date.isBeforeNow, "Invoice.date before now required")
   require(buyer != null, "Invoice.buyer required")
 
-  private var _draft = true
+  private var _issued = false
 
   private var _number = -1
 
   private var _items:List[LineItem] = Nil
 
-  def draft = _draft
+  def draft = !_issued
+
+  def issued = _issued
 
   def number = _number
 
@@ -42,21 +44,21 @@ class Invoice private[model] (
    * @param vatRate
    * @return
    */
-  def addItem(description:String, quantity:Int, unitPrice:BigDecimal, vatRate:BigDecimal=BigDecimal(0)):LineItem = {
-    if (_draft) {
-      val item = new LineItem(description, quantity, unitPrice, vatRate)
-      _items = item :: _items
-      item
+  private[model] def addLineItem(description:String, quantity:Int, unitPrice:BigDecimal, vatRate:BigDecimal):LineItem = {
+    require(draft, "Draft invoice required")
+    _items = new LineItem(description, quantity, unitPrice, vatRate) :: _items
+    _items.head
+  }
+
+
+  private[model] def issue() {
+    require(!_items.isEmpty, "Not empty invoice required")
+    if (!_issued) {
+      _issued = true
+      _number = seller.nextInvoiceNo
     }
-    else
-      sys.error("Cannot add line items to issued invoices")
   }
 
-
-  private[model] def issue(number:Int) {
-    _draft = false
-    _number = number
-  }
 
   def net = _items.map(_.net).reduce(_ + _)
 
@@ -71,6 +73,11 @@ class Invoice private[model] (
   }
 
   override def hashCode() : Int = 41 * ((41 * (41 + seller.hashCode)) + _number.hashCode)
+}
+
+
+object Invoice {
+  private[model] def apply(seller:Company, date:DateTime, buyer:Company) = new Invoice(seller, date, buyer)
 }
 
 
