@@ -10,7 +10,7 @@ dependencies {
     compile 'org.scala-lang:scala-library:2.10.2'
     compile 'com.github.nscala-time:nscala-time_2.10:0.4.2'
 
-    testCompile 'org.scalatest:scalatest_2.10:2.0.M6-SNAP26'
+    testCompile 'org.scalatest:scalatest_2.10:2.0.RC2'
     testCompile 'junit:junit:4.11'
 }
 

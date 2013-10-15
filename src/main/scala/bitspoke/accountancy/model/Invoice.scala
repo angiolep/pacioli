@@ -20,42 +20,33 @@ class Invoice private[model] (
   // TODO require(date.isBeforeNow, "Invoice.date before now required")
   require(buyer != null, "Invoice.buyer required")
 
-  private var _issued = false
 
-  private var _number = -1
-
-  private var _items:List[LineItem] = Nil
-
-  def draft = !_issued
-
-  def issued = _issued
+  private var _number:Option[Int] = None
 
   def number = _number
+
+  def draft = _number == None
+
+  private var _items:List[LineItem] = Nil
 
   def items = _items
 
 
   /**
-   * Prepend a new line item
+   * Add a new line item
    *
-   * @param description
-   * @param quantity
-   * @param unitPrice
-   * @param vatRate
-   * @return
+   * @param item
    */
-  private[model] def addLineItem(description:String, quantity:Int, unitPrice:BigDecimal, vatRate:BigDecimal):LineItem = {
+  def addLineItem(item:LineItem):Unit = {
     require(draft, "Draft invoice required")
-    _items = new LineItem(description, quantity, unitPrice, vatRate) :: _items
-    _items.head
+    _items = item :: _items
   }
 
 
-  private[model] def issue() {
+  def issue() {
     require(!_items.isEmpty, "Not empty invoice required")
-    if (!_issued) {
-      _issued = true
-      _number = seller.nextInvoiceNo
+    if (draft) {
+      _number = Some(seller.nextInvoiceNo)
     }
   }
 

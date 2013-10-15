@@ -1,31 +1,30 @@
 package bitspoke.accountancy.model
 
-import org.scalatest.FlatSpec
+import org.scalatest.{Matchers, FlatSpec}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.joda.time.DateTime
 
 
 @RunWith(classOf[JUnitRunner])
-class InvoiceSpec extends FlatSpec {
+class InvoiceSpec extends FlatSpec with Matchers {
 
-   "An Invoice" should "have its calculated properties passed" in {
+  val invoice = Invoice(Company("seller"), DateTime.now, Company("buyer"))
 
-     val invoice = Invoice(Company("seller"), DateTime.now, Company("seller"))
-     invoice.addLineItem("description", 5, BigDecimal("100.00"), BigDecimal("0.20"))
-     invoice.addLineItem("description", 1, BigDecimal("50.00"), BigDecimal("0.10"))
+   "An Invoice" should "have net, vat and gross calculated properly" in {
 
-     assertResult(BigDecimal("550.00"))(invoice.net)
-     assertResult(BigDecimal("105.00"))(invoice.vat)
-     assertResult(BigDecimal("655.00"))(invoice.gross)
+     invoice.addLineItem(new LineItem("description", 5, GBP("100.00"), RATE("0.20")))
+     invoice.addLineItem(new LineItem("description", 1, GBP("50.00"), RATE("0.10")))
+
+     invoice.net should be (GBP("550.00"))
+     invoice.vat should be (GBP("105.00"))
+     invoice.gross should be (GBP("655.00"))
    }
 
 
-   "An Invoice" should "be issued with a number" in {
-     val invoice = Invoice(Company("seller"), DateTime.now, Company("seller"))
-     invoice.addLineItem("description", 5, BigDecimal("100.00"), BigDecimal("0.20"))
+   it should "have a number only when issued" in {
+     invoice.number should be (None)
      invoice.issue()
-
-     assertResult(1)(invoice.number)
+     invoice.number should be (Some(1))
    }
  }

@@ -2,10 +2,21 @@ package bitspoke.accountancy.model
 
 
 class Sale(val invoice:Invoice) {
+  require(!invoice.draft, "Issued invoice required")
 
-  def closed = invoice.issued
+  var _shareholder:Option[Shareholder] = None
 
-  def close() {
-    invoice.issue()
+  def assignTo(s:Shareholder):Unit = _shareholder match  {
+    case Some(_) => println("throw error")
+    case _ => {
+      _shareholder = Some(s)
+      _shareholder.get.add(this)
+    }
   }
+
+}
+
+
+object Sale {
+  def apply(invoice:Invoice) = new Sale(invoice)
 }

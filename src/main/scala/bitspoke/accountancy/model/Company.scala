@@ -10,24 +10,23 @@ import org.joda.time.DateTime
  *
  * @param name the unique name of the company
  */
-class Company private (val name:String) extends Ordered[Company]
-{
+class Company private (val name:String) extends Ordered[Company] {
   require(name!=null && !name.trim.isEmpty, "Company.name required")
 
-  private var _sales:List[Sale] = Nil
+  private var _invoices:List[Invoice] = Nil
 
-  def sales = _sales
+  def invoices = _invoices
 
   /**
-   * Create a new sale having a draft invoice
+   * Create a new invoice having a draft invoice
    *
    * @param date
    * @param buyer
-   * @return a new sale
+   * @return a new invoice
    */
-  def openSale(date:DateTime, buyer:Company):Sale = {
-    _sales = new Sale(new Invoice(this, date, buyer)) :: _sales
-    _sales.head
+  def openDraftInvoice(date:DateTime, buyer:Company):Invoice = {
+    _invoices = new Invoice(this, date, buyer) :: _invoices
+    _invoices.head
   }
 
 
@@ -44,7 +43,7 @@ class Company private (val name:String) extends Ordered[Company]
    *
    * @return
    */
-  def draftInvoices:List[Invoice] = _sales.map(_.invoice).filter(_.draft)
+  def draftInvoices:List[Invoice] = _invoices.filter(_.draft)
 
 
   /**
@@ -52,7 +51,7 @@ class Company private (val name:String) extends Ordered[Company]
    *
    * @return
    */
-  def issuedInvoices:List[Invoice] = _sales.map(_.invoice).filter(_.issued)
+  def issuedInvoices:List[Invoice] = _invoices.filter(! _.draft)
 
 
   /**
@@ -60,17 +59,9 @@ class Company private (val name:String) extends Ordered[Company]
    *
    * @return
    */
-  def nextInvoiceNo:Int = _sales.length - issuedInvoices.length - draftInvoices.length + 1
+  def nextInvoiceNo:Int = _invoices.length - issuedInvoices.length - draftInvoices.length + 1
 
 
-  /**
-   * Close the supplied sale issuing its invoice
-   *
-   * @param sale the sale being closed
-   */
-  def closeSale(sale:Sale) {
-    sale.close()
-  }
 
 
   /**
@@ -79,7 +70,7 @@ class Company private (val name:String) extends Ordered[Company]
    * @param number the invoice number to lookup
    * @return some invoice or none
    */
-  def findInvoiceByNo(number:Int):Option[Invoice] = _sales.map(_.invoice).find(_.number == number)
+  def findInvoiceByNo(number:Int):Option[Invoice] = _invoices.find(_.number.get == number)
 
 
   /**
@@ -88,7 +79,7 @@ class Company private (val name:String) extends Ordered[Company]
    *
    * @return revenue
    */
-  def revenue():BigDecimal = _sales.map(_.invoice).filter(_.issued).map(_.net).reduce(_ + _)
+  def revenue():BigDecimal = issuedInvoices.map(_.net).reduce(_ + _)
 
 
 
