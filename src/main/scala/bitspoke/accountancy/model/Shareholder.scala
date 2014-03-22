@@ -1,24 +1,43 @@
 package bitspoke.accountancy.model
 
 
+
 /**
  * A shareholder or stockholder is an individual or institution (including a corporation) that
  * legally owns a share of stock in a public or private corporation.
  *
- * @param name
+ * @param person
  */
-class Shareholder(val name:String) {
+class Shareholder(val person:Person) {
 
-  var sales:Set[Sale] = Set.empty[Sale]
+  private var _sales  = Set.empty[Sale]
+
+  def sales = _sales
+
+  private var _dividends = Set.empty[Dividend]
+
+  def dividends = _dividends
 
 
   /**
    * Add a sale
    *
    * @param s the sale being added
-   * @return all of its sales
    */
-  def add(s:Sale) = sales += s
+  def add(s:Sale) {
+    _sales = _sales + s
+  }
+
+
+  /**
+   * Add a dividend
+   *
+   * @param d the dividend being added
+   * @return all dividends
+   */
+  def add(d:Dividend) {
+    _dividends = _dividends + d
+  }
 
 
   /**
@@ -26,7 +45,10 @@ class Shareholder(val name:String) {
    *
    * @return the turnover
    */
-  def turnover:BigDecimal = sales.map(_.invoice.net).reduce(_ + _)
+  def turnover:BigDecimal =
+    if (_sales.isEmpty) BigDecimal("0.00")
+    else sales.map(_.invoice.net).reduce(_ + _)
+
 
 
   def corporationTax:BigDecimal = turnover * BigDecimal("0.2")
@@ -35,6 +57,6 @@ class Shareholder(val name:String) {
 
 
 object Shareholder {
-  def apply(name:String) = new Shareholder(name)
+  def apply(person:Person) = new Shareholder(person)
 }
 

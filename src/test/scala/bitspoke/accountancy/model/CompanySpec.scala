@@ -2,12 +2,9 @@ package bitspoke.accountancy.model
 
 
 import org.scalatest.{FunSpec, Matchers}
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.joda.time.DateTime
 
 
-@RunWith(classOf[JUnitRunner])
 class CompanySpec extends FunSpec with Matchers {
 
   describe ("A Company") {
@@ -42,8 +39,8 @@ class CompanySpec extends FunSpec with Matchers {
       }
 
       it("should add line items to a draft invoice") {
-        invoice1.addLineItem(new LineItem("description", 5, GBP("100.00"), RATE("0.20")))
-        invoice1.addLineItem(new LineItem("description", 1, GBP("50.00"), RATE("0.10")))
+        invoice1 add LineItem("description", 5, GBP("100.00"), RATE("0.20"))
+        invoice1 add LineItem("description", 1, GBP("50.00"), RATE("0.10"))
         invoice1.items should have size(2)
       }
 

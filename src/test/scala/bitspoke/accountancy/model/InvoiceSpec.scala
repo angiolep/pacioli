@@ -1,30 +1,41 @@
 package bitspoke.accountancy.model
 
 import org.scalatest.{Matchers, FlatSpec}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.joda.time.DateTime
 
 
-@RunWith(classOf[JUnitRunner])
 class InvoiceSpec extends FlatSpec with Matchers {
 
-  val invoice = Invoice(Company("seller"), DateTime.now, Company("buyer"))
 
-   "An Invoice" should "have net, vat and gross calculated properly" in {
+  def fixture() =
+    new {
+      val seller: Company = Company("seller")
+      val buyer: Company = Company("buyer")
+      val invoice0 = Invoice(seller, DateTime.now, buyer)
+      val invoice1 = Invoice(seller, DateTime.now, buyer)
+      invoice1 add LineItem("description", 5, GBP("100.00"), RATE("0.20"))
+      invoice1 add LineItem("description", 1, GBP("50.00"), RATE("0.10"))
+    }
 
-     invoice.addLineItem(new LineItem("description", 5, GBP("100.00"), RATE("0.20")))
-     invoice.addLineItem(new LineItem("description", 1, GBP("50.00"), RATE("0.10")))
 
-     invoice.net should be (GBP("550.00"))
-     invoice.vat should be (GBP("105.00"))
-     invoice.gross should be (GBP("655.00"))
-   }
+  "An empty Invoice" should "not be issued" in {
+    val f = fixture(); import f._
+    the [IllegalArgumentException] thrownBy invoice0.issue() should have message ("requirement failed: Invoice with items required")
+  }
 
 
-   it should "have a number only when issued" in {
-     invoice.number should be (None)
-     invoice.issue()
-     invoice.number should be (Some(1))
-   }
- }
+  "An Invoice with items" should "have net, vat and gross calculated properly" in {
+    val f = fixture(); import f._
+    invoice1.net should be(GBP("550.00"))
+    invoice1.vat should be(GBP("105.00"))
+    invoice1.gross should be(GBP("655.00"))
+  }
+
+
+  it should "have a number only when issued" in {
+    val f = fixture(); import f._
+    invoice1.number should be(None)
+    invoice1.issue()
+    invoice1.number should be(Some(1))
+  }
+}

@@ -9,12 +9,8 @@ import org.joda.time.DateTime
  * @param date
  * @param buyer
  */
-class Invoice private[model] (
-      val seller:Company,
-      val date:DateTime,
-      val buyer:Company
-)
-{
+class Invoice (val seller:Company, val date:DateTime, val buyer:Company) {
+
   require(seller != null, "Invoice.seller required")
   require(date != null, "Invoice.date required")
   // TODO require(date.isBeforeNow, "Invoice.date before now required")
@@ -37,14 +33,14 @@ class Invoice private[model] (
    *
    * @param item
    */
-  def addLineItem(item:LineItem):Unit = {
+  def add(item:LineItem) {
     require(draft, "Draft invoice required")
     _items = item :: _items
   }
 
 
   def issue() {
-    require(!_items.isEmpty, "Not empty invoice required")
+    require(!_items.isEmpty, "Invoice with items required")
     if (draft) {
       _number = Some(seller.nextInvoiceNo)
     }

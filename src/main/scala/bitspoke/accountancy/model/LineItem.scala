@@ -10,13 +10,7 @@ import scala.BigDecimal
  * @param unitPrice the unit price
  * @param vatRate the VAT rate option
  */
-class LineItem  (
-      val description:String,
-      val quantity:Int,
-      val unitPrice:BigDecimal,
-      val vatRate:BigDecimal
-)
-{
+class LineItem  (val description:String, val quantity:Int, val unitPrice:BigDecimal, val vatRate:BigDecimal) {
 
   require(description != null && !description.trim.isEmpty, "LineItem.decription required")
   require(quantity > 0, "LineItem.quantity > 0 required")
@@ -26,6 +20,11 @@ class LineItem  (
   val net = unitPrice * quantity
   val vat = net * vatRate
   val gross = net + vat
+}
+
+
+object LineItem {
+  def apply(description:String, quantity:Int, unitPrice:BigDecimal, vatRate:BigDecimal) = new LineItem(description, quantity, unitPrice, vatRate)
 }
 
 
