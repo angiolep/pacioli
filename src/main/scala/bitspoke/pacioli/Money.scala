@@ -1,69 +1,64 @@
 package bitspoke.pacioli
 
-import java.math.BigDecimal
-import java.math.RoundingMode.HALF_EVEN
-import bitspoke.pacioli.Money.initializeBy
+import scala.math.BigDecimal
+import scala.math.BigDecimal.RoundingMode.HALF_EVEN
+
 
 /**
- * Represent money with amount and currency providing proper maths and roundings
+ * Represent money with amount and currency providing proper rounding and operators
  * 
- * @param amount for example "100.1287" will be rounded to "100.13" when currency is "GBP"
+ * @param amount for example "100.1287"
  * @param currency the ISO 4217 code
  * @see http://martinfowler.com/eaaCatalog/money.html
  */
-class Money private (val amount:String, val currency:String) {
-
-  val (scale, symbol) = initializeBy(currency)
-
-  private val amnt = new BigDecimal(amount).setScale(scale, HALF_EVEN)
+class Money private (val amount:BigDecimal)(implicit val currency:Currency) {  
 
   /**
-   * Add given augend amount when same currency
+   * Round this amount according to its currency (e.g "100.1287" becomes "100.13" when currency is "GBP")
+   */
+  def round = new Money(amount.setScale(currency.scale, HALF_EVEN))
+
+  /**
+   * Add given augend amount if same currency
    *
    * @param augend 
    */
-  def + (augend:Money) : Money = 
-    withSameCurrency (this, augend) { _ add _ }
+  def + (augend:Money) = ifSameCurrency (this, augend) { _ + _ }
 
   /**
-   * Subtract given subtrahend amount when same currency
+   * Subtract given subtrahend amount if same currency
    *
    * @param subtrahend 
    */
-  def - (subtrahend:Money) : Money = 
-    withSameCurrency (this, subtrahend) { _ subtract _ }
-
-    
-    
-
-  private def withSameCurrency(m1:Money, m2:Money)(op: (BigDecimal, BigDecimal) => BigDecimal) = 
+  def - (subtrahend:Money) = ifSameCurrency (this, subtrahend) { _ - _ }
+  
+        
+  private def ifSameCurrency(m1:Money, m2:Money)(f: (BigDecimal, BigDecimal) => BigDecimal) = 
     if (m1.currency == m2.currency) 
-      new Money(op(m1.amnt, m2.amnt).toString, m1.currency)
+     new Money( f(m1.amount, m2.amount) )
     else
       throw new CurrencyMismatchException
 
 
   // TODO override def equalsTo(that:Any) : Boolean = ???
+
       
-  override def toString() : String = s"${symbol}${amnt.toString}"
+  override def toString() : String = s"${currency.symbol}${amount.toString}"
 }
 
 
 
 object Money {
-
-  val Currencies = Map(
-    "GBP" -> (2, "£"),
-    "USD" -> (2, "$"),
-    "EUR" -> (2, "€"),
-    "JPY" -> (6, "¥")
-  )
   
-  def apply(amount:String, currency:String="GBP") = 
-    new Money(amount, currency)
+  def apply(amount:BigDecimal, currency:Currency) = {
+    implicit val ccy = currency
+    new Money(amount)
+  }
 
-  def initializeBy(currency:String) = 
-    Currencies.get(currency).getOrElse(throw new UnknownCurrencyException)
+  def apply(amount:String, currency:Currency) = {
+    implicit val ccy = currency
+    new Money(BigDecimal(amount))
+  }
 }
 
 
@@ -71,5 +66,8 @@ object Money {
 class UnknownCurrencyException extends RuntimeException
 
 class CurrencyMismatchException extends RuntimeException
+
+
+
 
 
