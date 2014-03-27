@@ -1,13 +1,13 @@
 package bitspoke.accountancy.model
 
-import org.scalatest.{Matchers, FlatSpec}
+// import org.scalatest.{Matchers, FlatSpec}
 import org.joda.time.DateTime
 
 
-class InvoiceSpec extends FlatSpec with Matchers {
+class InvoiceSpec /*extends FlatSpec with Matchers*/ {
 
 
-  def fixture() =
+  /*def fixture() =
     new {
       val seller: Company = Company("seller")
       val buyer: Company = Company("buyer")
@@ -37,5 +37,5 @@ class InvoiceSpec extends FlatSpec with Matchers {
     invoice1.number should be(None)
     invoice1.issue()
     invoice1.number should be(Some(1))
-  }
+  }*/
 }

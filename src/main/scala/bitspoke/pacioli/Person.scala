@@ -1,7 +1,9 @@
-package bitspoke.accountancy.model
+package bitspoke.pacioli
 
 /**
- * Any human
+ * Any human person that can be identified by name
+ *
+ * @param name the unique name
  */
 class Person(val name:String) {
 
@@ -11,6 +13,8 @@ class Person(val name:String) {
   }
 
   override def hashCode() = 41 * (41 + name.hashCode)
+
+  override def toString = name
 }
 
 

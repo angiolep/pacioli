@@ -1,12 +1,13 @@
 package bitspoke.accountancy.model
 
-import org.scalatest.{Matchers, FlatSpec}
+// import org.scalatest.{Matchers, FlatSpec}
 import org.joda.time.DateTime
+import bitspoke.pacioli.Person
 
 
-class SaleSpec extends FlatSpec with Matchers {
+class SaleSpec /*extends FlatSpec with Matchers*/ {
 
-  def fixture =
+  /*def fixture =
     {
       new {
         val seller: Company = Company("seller")
@@ -30,6 +31,6 @@ class SaleSpec extends FlatSpec with Matchers {
 
     val thrown2 = the [IllegalArgumentException] thrownBy Sale(invoice0)
     thrown2.getMessage should endWith ("not empty invoice required")
-  }
+  }*/
 
 }

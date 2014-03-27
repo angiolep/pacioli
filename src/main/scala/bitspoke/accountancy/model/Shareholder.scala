@@ -1,14 +1,15 @@
 package bitspoke.accountancy.model
 
+import bitspoke.pacioli.Person
 
 
 /**
  * A shareholder or stockholder is an individual or institution (including a corporation) that
  * legally owns a share of stock in a public or private corporation.
  *
- * @param person
+ * @param name the unique name
  */
-class Shareholder(val person:Person) {
+class Shareholder(name:String) extends Person(name) {
 
   private var _sales  = Set.empty[Sale]
 
@@ -57,6 +58,6 @@ class Shareholder(val person:Person) {
 
 
 object Shareholder {
-  def apply(person:Person) = new Shareholder(person)
+  def apply(name:String) = new Shareholder(name)
 }
 

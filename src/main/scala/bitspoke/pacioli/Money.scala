@@ -40,7 +40,10 @@ class Money private (val amount:BigDecimal)(implicit val currency:Currency) {
       throw new CurrencyMismatchException
 
 
-  // TODO override def equalsTo(that:Any) : Boolean = ???
+  override def equals(other:Any) = other match {
+    case that:Money => this.currency == that.currency && this.amount == that.amount
+    case _ => false
+  }
 
       
   override def toString() : String = s"${currency.symbol}${amount.toString}"
@@ -49,14 +52,7 @@ class Money private (val amount:BigDecimal)(implicit val currency:Currency) {
 
 
 object Money {
-  
-  def apply(amount:BigDecimal, currency:Currency) = {
-    implicit val ccy = currency
-    new Money(amount)
-  }
-
-  def apply(amount:String, currency:Currency) = {
-    implicit val ccy = currency
+  def apply(amount:String)(implicit currency:Currency) = {
     new Money(BigDecimal(amount))
   }
 }
